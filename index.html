@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Orthomosaic — OpenLayers</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- OpenLayers CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@v9.1.0/ol.css">
+
+    <!-- OpenLayers JS -->
+    <script src="https://cdn.jsdelivr.net/npm/ol@v9.1.0/dist/ol.js"></script>
+
+    <style>
+        html, body, #map {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+
+        .layerSwitcher {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script>
+
+    // ------------------------------------------------------------
+    //   БАЗОВЫЙ СПУТНИКОВЫЙ СЛОЙ (ESRI World Imagery)
+    // ------------------------------------------------------------
+    const satellite = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+    url: "https://nt0.napr.gov.ge/NGCache?x={x}&y={y}&z={z}&l=ORTHO_GEORGIA_4",
+    crossOrigin: "anonymous",
+    tilePixelRatio: 1,
+  }),
+  opacity: 1
+});
+
+
+    // ------------------------------------------------------------
+    //   ORTHO EAST
+    // ------------------------------------------------------------
+    const orthoEast = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: 'https://topobatumigeo.github.io/east_peninsula.f/{z}/{x}/{y}.png',
+
+            // Указываем: тайлы существуют только от 19 уровня
+            minZoom: 14,
+            maxZoom: 22,
+            tileGrid: new ol.tilegrid.TileGrid({
+                tileSize: 256,
+                extent: ol.proj.get('EPSG:3857').getExtent(),
+                resolutions: Array.from({length: 23}, (_, z) => 156543.03392804097 / Math.pow(2, z)),
+                // ТАЙЛЫ ЕСТЬ ТОЛЬКО С 19 уровня
+                minZoom: 19
+            })
+        }),
+        visible: true,
+        opacity: 1
+    });
+
+
+    // ------------------------------------------------------------
+    //   ORTHO WEST
+    // ------------------------------------------------------------
+    const orthoWest = new ol.layer.Tile({
+        source: new ol.source.XYZ({
+            url: 'https://topobatumigeo.github.io/west_peninsula/{z}/{x}/{y}.png',
+
+            minZoom: 14,
+            maxZoom: 22,
+            tileGrid: new ol.tilegrid.TileGrid({
+                tileSize: 256,
+                extent: ol.proj.get('EPSG:3857').getExtent(),
+                resolutions: Array.from({length: 23}, (_, z) => 156543.03392804097 / Math.pow(2, z)),
+                minZoom: 19
+            })
+        }),
+        visible: true,
+        opacity: 1
+    });
+
+
+    // ------------------------------------------------------------
+    //   КАРТА
+    // ------------------------------------------------------------
+    const map = new ol.Map({
+        target: 'map',
+        layers: [
+            satellite,
+            orthoEast,
+            orthoWest
+        ],
+        view: new ol.View({
+            center: ol.proj.fromLonLat([41.675, 41.6598]),
+            zoom: 17,
+            minZoom: 14,
+            maxZoom: 22
+        })
+    });
+
+</script>
+
+</body>
+</html>
