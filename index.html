@@ -91,6 +91,29 @@
         visible: true,
         opacity: 1
     });
+	
+	
+	// ------------------------------------------------------------
+    //   НОВЫЙ WMS СЛОЙ (NG_REG_LAYER)
+    // ------------------------------------------------------------
+    const wmsLayer = new ol.layer.Tile({
+        title: 'NG_REG_LAYER (Реестр)',
+        source: new ol.source.TileWMS({
+            url: 'https://nv.napr.gov.ge/geoserver/ows', 
+            params: {
+                // Имя слоя без префикса рабочей области
+                'LAYERS': 'NG_REG_LAYER', 
+                
+                // Убираем явный CRS, чтобы OpenLayers сам определил 3857
+                'TILED': true,
+                'FORMAT': 'image/png'
+            },
+            serverType: 'geoserver',
+            crossOrigin: 'anonymous'
+        }),
+        visible: true, 
+        opacity: 0.7 
+    });
 
 
     // ------------------------------------------------------------
@@ -101,11 +124,12 @@
         layers: [
             satellite,
             orthoEast,
-            orthoWest
+            orthoWest,
+			wmsLayer
         ],
         view: new ol.View({
             center: ol.proj.fromLonLat([41.675, 41.6598]),
-            zoom: 17,
+            zoom: 15,
             minZoom: 14,
             maxZoom: 22
         })
